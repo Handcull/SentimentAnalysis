@@ -1,57 +1,61 @@
-from sqlalchemy import Column, Integer, String, Float
-from .database import Base
-from sqlalchemy import Column, Integer, String, Float, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from .database import Base
 
+from .database import Base
 
 
 class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
-    categories = Column(String(100))
-    address = Column(String(255))
+    name = Column(String(255))
     city = Column(String(100))
     province = Column(String(100))
-    country = Column(String(50))
-    postalCode = Column(String(20))
+    country = Column(String(100))
     latitude = Column(Float)
     longitude = Column(Float)
 
-    # Relation to feedback table
-    feedbacks = relationship("Feedback", back_populates="product")
+    # optional: hubungan ke Review
+    reviews = relationship("Review", back_populates="product", lazy="selectin")
+
 
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(100), index=True)          # we can enforce unique later if needed
-    user_city = Column(String(100))
-    user_province = Column(String(100))
+    username = Column(String(255))
+    user_city = Column(String(255))
+    user_province = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relation to feedback table
-    feedbacks = relationship("Feedback", back_populates="user")
+
+    # relasi ke reviews
+    reviews = relationship("Review", back_populates="user")
 
 
-class Feedback(Base):
-    __tablename__ = "feedback"
+class Review(Base):
+    __tablename__ = "reviews"
 
     id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    product_id = Column(Integer, nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
 
-    rating = Column(Integer)                 # 1–5 from the CSV
-    title = Column(String(255))
+    rating = Column(Integer)
+    title = Column(Text)
     text = Column(Text)
-    review_date = Column(DateTime)          # from reviews.date
-    sentiment_label = Column(String(20))    # "positive"/"neutral"/"negative" (computed later)
-    text_length = Column(Integer)           # for correlation analysis
+    review_date = Column(DateTime)
+
+    # kolom sentiment
+    sentiment_label = Column(String(20))
+    polarity = Column(Float)
+    subjectivity = Column(Float)
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    #Relationship
-    user = relationship("User", back_populates="feedbacks")
-    product = relationship("Product", back_populates="feedbacks")
+
+
+    user = relationship("User", back_populates="reviews")
+
+    product_id = Column(Integer, ForeignKey("products.id"), default=0)
+    product = relationship("Product", back_populates="reviews")
+
+
