@@ -6,7 +6,6 @@ from app.database import get_db
 from app.products.router import router as products_router
 from app.users.router import router as users_router
 from app.feedback.router import router as reviews_router
-from app.sentiment_analysis import router as sentiment_router
 from app.analytics.router import router as analytics_router
 
 
@@ -32,7 +31,6 @@ def db_test(db: Session = Depends(get_db)):
 app.include_router(products_router)
 app.include_router(users_router)
 app.include_router(reviews_router)
-app.include_router(sentiment_router)
 app.include_router(analytics_router)
 
 
