@@ -32,26 +32,3 @@ app.include_router(products_router)
 app.include_router(users_router)
 app.include_router(reviews_router)
 app.include_router(analytics_router)
-
-
-from fastapi.responses import StreamingResponse
-import matplotlib.pyplot as plt
-import io
-
-@app.get("/plot.png")
-def plot_png():
-    # 1. Bikin figure Matplotlib
-    fig, ax = plt.subplots()
-    ax.plot([1, 2, 3, 4], [10, 3, 7, 9])
-    ax.set_title("Contoh Plot")
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-
-    # 2. Simpan ke buffer (bukan ke file)
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight")
-    plt.close(fig)  # biar memory nggak bocor
-    buf.seek(0)
-
-    # 3. Kirim sebagai response gambar
-    return StreamingResponse(buf, media_type="image/png")
