@@ -358,8 +358,12 @@ def rating_length_correlation_plot(
         return {"error": "Tidak ada review dalam rentang ini."}
 
     records = [(r.rating, count_letters(r.text)) for r in reviews]
-    ratings = np.array([r for r, L in records])
-    lengths = np.array([L for r, L in records])
+    ratings = np.array([r for r, L in records], dtype=float)
+    lengths = np.array([L for r, L in records], dtype=float)
+
+    mask = (ratings >= 1) & (ratings <= 5)
+    ratings = ratings[mask]
+    lengths = lengths[mask]
 
     pearson_r, _ = pearsonr(ratings, lengths)
 
@@ -369,6 +373,8 @@ def rating_length_correlation_plot(
     ax.set_xlabel("Review Length (letters only)")
     ax.set_ylabel("Rating (1–5)")
     ax.grid(True)
+    ax.set_ylim(0, 6)
+    ax.set_yticks([1, 2, 3, 4, 5])
 
     buf = io.BytesIO()
     fig.savefig(buf, format="png", bbox_inches="tight")
@@ -376,3 +382,4 @@ def rating_length_correlation_plot(
     buf.seek(0)
 
     return StreamingResponse(buf, media_type="image/png")
+
